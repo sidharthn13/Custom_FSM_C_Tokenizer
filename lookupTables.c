@@ -10,7 +10,7 @@ uchar keywordHashFunction(char* str){
     return index%31;
 }
 
-mapNode* createMapNode(char* str){
+mapNode* createMapNode(char* str){ 
     mapNode* mapEntry = (mapNode *)malloc(sizeof(mapNode));
     strcpy(mapEntry->value, str);
     mapEntry->chainedNode = NULL;
@@ -19,10 +19,8 @@ mapNode* createMapNode(char* str){
 
 void addToMap(mapNode* map[], mapNode* mapEntry){
     uchar index = keywordHashFunction(mapEntry->value);
-    if(map[index] == NULL){  //this is where the bug is being generated 
-        printf("the contents of the global map array at index %hu is NULL\n", index);
+    if(map[index] == NULL){  
         map[index] = mapEntry;
-        printf("the contents of the mapNode is : %s\n",mapEntry->value);
         return;
     }
     mapNode *currEntry = map[index];
@@ -38,8 +36,6 @@ void addToMap(mapNode* map[], mapNode* mapEntry){
 
 void keywordMapInit(){
     //list of all keywords in C programming:
-
-
     char* keywords[KEYWORD_MAP_SIZE] = {
     "auto",
     "break",
@@ -74,9 +70,10 @@ void keywordMapInit(){
     "volatile",
     "while"
     }; 
+    mapNode *mapEntry;
     for(int i = 0; i < KEYWORD_MAP_SIZE; i++){
-        printf("the keyword is : %s \n", keywords[i]);
-        mapNode *mapEntry = createMapNode(keywords[i]);
+        mapEntry = createMapNode(keywords[i]);
+        printf("the keyword value is : %s\n", mapEntry->value);
         addToMap(keywordMap,mapEntry); 
     }
 }

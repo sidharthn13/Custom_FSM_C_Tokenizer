@@ -3,7 +3,7 @@
 
 //defining bucket struct for keyword map:
 typedef struct mapNode{
-    char* value;
+    char value[10];
     struct mapNode* chainedNode;
 }mapNode;
 
