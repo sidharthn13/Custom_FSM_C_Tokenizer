@@ -7,7 +7,7 @@ typedef struct mapNode{
     struct mapNode* chainedNode;
 }mapNode;
 
-//declaring keyword map initialised in the stack of main function in main file:
+//declaring keyword map initialised in main file and letting the linker know data present in this particular mem location is shared:
 extern mapNode* keywordMap[KEYWORD_MAP_SIZE];
 
 //function prototypes:
