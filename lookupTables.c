@@ -1,7 +1,7 @@
 #include "typeDefinitions.h"
 #include "lookupTables.h"
 
-uchar keywordHashFunction(char* str){
+uchar hashFunction(char* str){
     uchar index = 0;
     for(uchar i = 0; str[i]!='\0' ; i++){
         index += (uchar)str[i];
@@ -18,7 +18,7 @@ mapNode* createMapNode(char* str){
 }
 
 void addToMap(mapNode* map[], mapNode* mapEntry){
-    uchar index = keywordHashFunction(mapEntry->value);
+    uchar index = hashFunction(mapEntry->value);
     if(map[index] == NULL){  
         map[index] = mapEntry;
         return;
@@ -36,49 +36,27 @@ void addToMap(mapNode* map[], mapNode* mapEntry){
 
 void keywordMapInit(){
     //list of all keywords in C programming:
-    char* keywords[KEYWORD_MAP_SIZE] = {
-    "auto",
-    "break",
-    "case",
-    "char",
-    "const",
-    "continue",
-    "default",
-    "do",
-    "double",
-    "else",
-    "enum",
-    "extern",
-    "float",
-    "for",
-    "goto",
-    "if",
-    "int",
-    "long",
-    "register",
-    "return",
-    "short",
-    "signed",
-    "sizeof",
-    "static",
-    "struct",
-    "switch",
-    "typedef",
-    "union",
-    "unsigned",
-    "void",
-    "volatile",
-    "while"
-    }; 
-    mapNode *mapEntry;
+    char* keywords[KEYWORD_MAP_SIZE] = {"auto","break","case","char","const","continue","default","do","double","else",
+    "enum","extern","float","for","goto","if","int","long","register","return","short","signed","sizeof","static","struct",
+    "switch","typedef","union","unsigned","void","volatile","while"}; 
     for(int i = 0; i < KEYWORD_MAP_SIZE; i++){
-        mapEntry = createMapNode(keywords[i]);
+        mapNode *mapEntry = createMapNode(keywords[i]);
         addToMap(keywordMap,mapEntry); 
     }
 }
 
+void operatorMapInit(){
+    char* operators[OPERATOR_MAP_SIZE] = {"+", "-", "*", "/", "%", "=", "+=", "-=", "*=", "/=", "%=", 
+                        "<<=", ">>=", "&=", "|=", "^=", "++", "--", "==", "!=", ">", 
+                        "<", ">=", "<=", "&&", "||", "&", "|", "^", "~", "<<", ">>"};
+    for(int i = 0; i < OPERATOR_MAP_SIZE; i++){
+        mapNode *mapEntry = createMapNode(operators[i]);
+        addToMap(operatorMap, mapEntry);
+    }
+}
+
 mapNode* getFromMap(mapNode* map[], char* str, uchar sizeOfMap){
-    uchar index = keywordHashFunction(str);
+    uchar index = hashFunction(str);
     if(index < 0 || index >= sizeOfMap){   //to prevent undefined behaviour associated with array index out of bound access
         return NULL;
     }
