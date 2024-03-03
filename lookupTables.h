@@ -8,11 +8,11 @@ typedef struct mapNode{
 }mapNode;
 
 //declaring keyword map initialised in the stack of main function in main file:
-mapNode* keywordMap[KEYWORD_MAP_SIZE];
+extern mapNode* keywordMap[KEYWORD_MAP_SIZE];
 
 //function prototypes:
 uchar keywordHashFunction(char* string);
 mapNode* createMapNode(char* str);
 void addToMap(mapNode* map[], mapNode* mapEntry);
 void keywordMapInit();
-mapNode* getFromMap(mapNode* map[], char* str);
+mapNode* getFromMap(mapNode* map[], char* str, uchar sizeOfMap);

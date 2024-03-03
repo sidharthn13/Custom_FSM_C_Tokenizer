@@ -4,7 +4,7 @@
 uchar keywordHashFunction(char* str){
     uchar index = 0;
     for(uchar i = 0; str[i]!='\0' ; i++){
-        index += (int)str[i];
+        index += (uchar)str[i];
     }
     index = (0.3456*index)*31;
     return index%31;
@@ -73,13 +73,15 @@ void keywordMapInit(){
     mapNode *mapEntry;
     for(int i = 0; i < KEYWORD_MAP_SIZE; i++){
         mapEntry = createMapNode(keywords[i]);
-        printf("the keyword value is : %s\n", mapEntry->value);
         addToMap(keywordMap,mapEntry); 
     }
 }
 
-mapNode* getFromMap(mapNode* map[], char* str){
+mapNode* getFromMap(mapNode* map[], char* str, uchar sizeOfMap){
     uchar index = keywordHashFunction(str);
+    if(index < 0 || index >= sizeOfMap){   //to prevent undefined behaviour associated with array index out of bound access
+        return NULL;
+    }
     if(map[index]==NULL){
         return NULL;
     }
