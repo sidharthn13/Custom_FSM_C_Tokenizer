@@ -16,13 +16,7 @@ void main(){
     fileReadBuffer fileBuff;
     fileBuff.fileStream = fopen("src.c", "rb");
     while(!feof(fileBuff.fileStream)){
-        int res = fread(fileBuff.inputSymbol, 1, 1, fileBuff.fileStream);
-        printf("%c", fileBuff.inputSymbol[0]);
+        fread(fileBuff.inputSymbol, 1, 1, fileBuff.fileStream);
         fsmUpdateState(fsm, &lexBuff, &fileBuff);
     }
-    
-    // mapNode *lookupResultKeyword = getFromMap(keywordMap,"break",KEYWORD_MAP_SIZE);
-    // printf("the result of the lookup is : %s\n", lookupResultKeyword->value);
-    // mapNode *lookupResultOper = getFromMap(operatorMap, "+-+", OPERATOR_MAP_SIZE);
-    // printf("the result of the lookup is : %s\n", lookupResultOper->value);
 }

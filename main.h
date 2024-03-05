@@ -13,7 +13,7 @@ typedef struct lexemeBuffer{
 
 typedef struct fileReadBuffer{
     FILE *fileStream;
-    char inputSymbol[1];
+    uchar inputSymbol[1];
 }fileReadBuffer;
 #endif
 
