@@ -3,10 +3,13 @@
 #define OPERATOR_MAP_SIZE 32
 
 //defining bucket struct for keyword map:
+#ifndef LOOKUP_TABLE_NODE_SAFETY
+#define LOOKUP_TABLE_NODE_SAFETY
 typedef struct mapNode{
     char value[10];
     struct mapNode* chainedNode;
 }mapNode;
+#endif
 
 //declaring maps initialised in main file and letting the linker know data present in this particular mem location is shared:
 extern mapNode* keywordMap[KEYWORD_MAP_SIZE];

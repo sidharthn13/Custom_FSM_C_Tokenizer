@@ -1,4 +1,4 @@
-#include "typeDefinitions.h"
+#include "main.h"
 #include "FSM.h"
 
 FSM* fsmInit(){
@@ -10,4 +10,6 @@ FSM* fsmInit(){
 void fsmDestroy(FSM* fsm){
     free(fsm);
 }
-
+void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
+    printf("current state = %d\n", fsm->currState);
+}

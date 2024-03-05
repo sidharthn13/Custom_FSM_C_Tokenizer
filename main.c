@@ -1,4 +1,4 @@
-#include "typeDefinitions.h"
+#include "main.h"
 #include "FSM.h"
 #include "lookupTables.h"
 
@@ -18,6 +18,7 @@ void main(){
     while(!feof(fileBuff.fileStream)){
         int res = fread(fileBuff.inputSymbol, 1, 1, fileBuff.fileStream);
         printf("%c", fileBuff.inputSymbol[0]);
+        fsmUpdateState(fsm, &lexBuff, &fileBuff);
     }
     
     // mapNode *lookupResultKeyword = getFromMap(keywordMap,"break",KEYWORD_MAP_SIZE);

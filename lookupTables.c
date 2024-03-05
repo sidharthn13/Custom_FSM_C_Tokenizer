@@ -1,4 +1,4 @@
-#include "typeDefinitions.h"
+#include "main.h"
 #include "lookupTables.h"
 
 uchar hashFunction(char* str){
