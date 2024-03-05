@@ -11,9 +11,17 @@ void main(){
     FSM* fsm = fsmInit(); 
     keywordMapInit();    //Initialize hashmap containing keywords
     operatorMapInit();  //Initialize hashmap containing operators
-    mapNode *lookupResultKeyword = getFromMap(keywordMap,"break",KEYWORD_MAP_SIZE);
-    printf("the result of the lookup is : %s\n", lookupResultKeyword->value);
-
-    mapNode *lookupResultOper = getFromMap(operatorMap, "+-+", OPERATOR_MAP_SIZE);
-    printf("the result of the lookup is : %s\n", lookupResultOper->value);
+    
+    lexemeBuffer lexBuff;
+    fileReadBuffer fileBuff;
+    fileBuff.fileStream = fopen("src.c", "rb");
+    while(!feof(fileBuff.fileStream)){
+        int res = fread(fileBuff.inputSymbol, 1, 1, fileBuff.fileStream);
+        printf("%c", fileBuff.inputSymbol[0]);
+    }
+    
+    // mapNode *lookupResultKeyword = getFromMap(keywordMap,"break",KEYWORD_MAP_SIZE);
+    // printf("the result of the lookup is : %s\n", lookupResultKeyword->value);
+    // mapNode *lookupResultOper = getFromMap(operatorMap, "+-+", OPERATOR_MAP_SIZE);
+    // printf("the result of the lookup is : %s\n", lookupResultOper->value);
 }
