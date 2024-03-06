@@ -16,7 +16,7 @@ void main(){
     fileReadBuffer fileBuff;
     fileBuff.fileStream = fopen("src.c", "rb");
     while(!feof(fileBuff.fileStream)){
-        fread(fileBuff.inputSymbol, 1, 1, fileBuff.fileStream);
+        fileBuff.inputSymbol[0] = fgetc(fileBuff.fileStream);
         fsmUpdateState(fsm, &lexBuff, &fileBuff);
     }
 }
