@@ -14,11 +14,13 @@ void addToLexemeBuffer(lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     lexBuff->lexeme[lexBuff->index] = fileBuff->inputSymbol[0];
     lexBuff->index += 1;
 }
+void resetLexemeBuffer(lexemeBuffer *lexBuff){
+    lexBuff->index = 0;
+}
 void printBufferContents(lexemeBuffer *lexBuff){
-    for(uchar i = 0; i<= lexBuff->index ; i++){
+    for(uchar i = 0; i< lexBuff->index ; i++){
         printf("%c",lexBuff->lexeme[i]);
     }
-    printf(" : ");
     lexBuff->index = 0;
 }
 void printDelimiter(fileReadBuffer *fileBuff){
@@ -29,12 +31,18 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     switch(inputSymbol){
         //case condition to check for underscore
         case 95:
+
+            //if states are 5, 6 -> write necessary logic here
+
             fsm->prevState=fsm->currState;
             fsm->currState=1;
             break;
         //case condition to check for alphabets
         case 65 ... 90:
         case 97 ... 122:
+
+            //if states are 5, 6 -> write necessary logic here
+
             if(fsm->currState == 0 || fsm->currState == 1 || fsm->currState == 2){
                 fsm->prevState=fsm->currState;
                 fsm->currState=2;
@@ -54,7 +62,13 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
             fsm->currState=3;
             break;
         //case condition to check for digits
-        case 48 ... 47:
+        case 48 ... 57:
+
+            //if states are 5, 6 -> write necessary logic here
+            if(fsm->currState == 1 || fsm->currState == 2){
+                fsm->prevState = fsm->currState;
+                break;
+            }
             if(fsm->currState == 0 || fsm->currState == 4 || (fsm->currState == 7 && fsm->tokenAttribute.operatorCount==1)){
                 fsm->prevState = fsm->currState;
                 fsm->currState = 4;
@@ -62,6 +76,9 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
             }
         //case condition to check for the dot operator
         case 46:
+
+            //if states are 5, 6 -> write necessary logic here
+
             if(fsm->currState != 4){
                 fsm->prevState = fsm->currState;
                 fsm->currState = 8;
@@ -93,6 +110,9 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         //case condition to check for + and - 
         case 43:
         case 45:
+
+            //if states are 5, 6 -> write necessary logic here
+
             if(fsm->currState == 0){
                 fsm->prevState = 0;
                 fsm->currState = 7;
@@ -105,6 +125,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
             }
             fsm->prevState = fsm->currState;
             fsm->currState = 8;
+            fsm->tokenAttribute.operatorCount=1;
             break;
         //case condition to check for other operators
         case 33:
@@ -117,9 +138,11 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         case 62:
         case 63:
         case 94:
-        case 98:
         case 124:
         case 126:
+
+            //if states are 5, 6 -> write necessary logic here
+
             if(fsm->currState!=8){
                 fsm->prevState=fsm->currState;
                 fsm->currState = 8;
@@ -134,5 +157,32 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         case 32:
             fsm->prevState = fsm->currState;
             fsm->currState = 10;
+    }
+}
+
+void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
+    uchar currState = fsm->currState;
+    uchar prevState = fsm->prevState;
+    
+    switch(currState){
+        case 1:
+        case 2:
+            addToLexemeBuffer(lexBuff,fileBuff);
+            break;
+        case 3:
+            printBufferContents(lexBuff);
+            if(prevState==2){
+                lexBuff->lexeme[lexBuff->index] = '\0';
+                // printf("the lexBuff contents are : %s\n", lexBuff->lexeme);
+                // printf("the index is : %hhu\n", lexBuff->index);
+                // for(uchar i = 0; i <= lexBuff->index; i++){printf("%c\n",lexBuff->lexeme[i]);}
+                if(getFromMap(keywordMap,lexBuff->lexeme, KEYWORD_MAP_SIZE)==NULL){
+                    printf("  :  Identifier\n");
+                }
+                else{printf("  :  Keyword\n");}
+            }
+            resetLexemeBuffer(lexBuff);
+            fsm->currState = 0;
+            break;
     }
 }

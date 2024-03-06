@@ -20,5 +20,7 @@ FSM* fsmInit(); //initialises the FSM with prev and curr state set to 0
 void fsmDestroy(FSM* fsm); //deallocates the memory memory for fsm
 void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff);
 void addToLexemeBuffer(lexemeBuffer *lexBuff, fileReadBuffer *fileBuff);
+void resetLexemeBuffer(lexemeBuffer *lexBuff);
 void printBufferContents(lexemeBuffer *lexBuff);
 void printDelimiter(fileReadBuffer *fileBuff);
+void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff);

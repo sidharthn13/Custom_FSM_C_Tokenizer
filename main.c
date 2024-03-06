@@ -13,10 +13,13 @@ void main(){
     operatorMapInit();  //Initialize hashmap containing operators
     
     lexemeBuffer lexBuff;
+    lexBuff.index=0;
     fileReadBuffer fileBuff;
     fileBuff.fileStream = fopen("src.c", "rb");
     while(!feof(fileBuff.fileStream)){
         fileBuff.inputSymbol[0] = fgetc(fileBuff.fileStream);
         fsmUpdateState(fsm, &lexBuff, &fileBuff);
+
+        performStateOperation(fsm, &lexBuff, &fileBuff);
     }
 }
