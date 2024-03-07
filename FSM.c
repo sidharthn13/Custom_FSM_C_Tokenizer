@@ -22,8 +22,21 @@ void printBufferContents(lexemeBuffer *lexBuff){
         printf("%c",lexBuff->lexeme[i]);
     }
 }
-void printDelimiter(fileReadBuffer *fileBuff){
-    printf("%c", fileBuff->inputSymbol[0]);
+void printTokenType(FSM * fsm, lexemeBuffer *lexBuff){
+    uchar prevState = fsm->prevState;
+    if(prevState == 1){
+        printf("  :  Identifier\n");
+                        }
+    else if(prevState==2){
+        lexBuff->lexeme[lexBuff->index] = '\0';
+        if(getFromMap(keywordMap,lexBuff->lexeme, KEYWORD_MAP_SIZE)==NULL){
+            printf("  :  Identifier\n");
+                }
+        else{printf("  :  Keyword\n");}
+                        }
+    else if(prevState == 4){
+                    printf("  :  Constant\n");
+                        }
 }
 void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     uchar inputSymbol = fileBuff->inputSymbol[0];
@@ -152,7 +165,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
                 fsm->tokenAttribute.operatorCount=1;
                 break;
             }
-            fsm->tokenAttribute.operatorCount = 1;
+            fsm->tokenAttribute.operatorCount += 1;
             break;
         //case condition to check for whitespace, newline and tab characters
         case 9:
@@ -165,7 +178,6 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
 
 void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     uchar currState = fsm->currState;
-    uchar prevState = fsm->prevState;
     switch(currState){
         case 1:
         case 2:
@@ -175,22 +187,12 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
             break;
         case 3:
             printBufferContents(lexBuff);
-            if(prevState == 1){
-                printf("  :  Identifier\n");
-            }
-            else if(prevState==2){
-                lexBuff->lexeme[lexBuff->index] = '\0';
-                if(getFromMap(keywordMap,lexBuff->lexeme, KEYWORD_MAP_SIZE)==NULL){
-                    printf("  :  Identifier\n");
-                }
-                else{printf("  :  Keyword\n");}
-            }
-            else if(prevState == 4){
-                printf("  :  Constant\n");
-            }
+            printTokenType(fsm, lexBuff);
             resetLexemeBuffer(lexBuff);
             fsm->currState = 0;
             printf("%c  :  Punctuator\n", fileBuff->inputSymbol[0]);
             break;
+        // case 8:
+
     }
 }
