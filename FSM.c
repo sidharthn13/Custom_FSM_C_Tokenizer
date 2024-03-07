@@ -69,7 +69,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
                 fsm->currState = 1;
                 break;
             }
-            if(fsm->currState == 0 || fsm->currState == 4 || (fsm->currState == 7 && fsm->tokenAttribute.operatorCount==1)){
+            if(fsm->currState == 0 || fsm->currState == 4 || fsm->currState == 7 ){
                 fsm->prevState = fsm->currState;
                 fsm->currState = 4;
                 break;
@@ -82,6 +82,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
             if(fsm->currState != 4){
                 fsm->prevState = fsm->currState;
                 fsm->currState = 8;
+                fsm->tokenAttribute.operatorCount = 1;
                 break;
             }
             fsm->flags.isDecimal=1;
@@ -119,7 +120,9 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
                 fsm->tokenAttribute.operatorCount = 1;
                 break;
             }
-            if(fsm->currState == 7 || fsm->currState == 8){
+            if(fsm->currState == 7 || fsm->currState == 8){    // <--------------------------------------need to fix this case
+                fsm->prevState = fsm->currState;
+                fsm->currState = 8;
                 fsm->tokenAttribute.operatorCount += 1;
                 break;
             }
@@ -166,6 +169,8 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
     switch(currState){
         case 1:
         case 2:
+        case 4:
+        case 7:
             addToLexemeBuffer(lexBuff,fileBuff);
             break;
         case 3:
@@ -179,6 +184,9 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
                     printf("  :  Identifier\n");
                 }
                 else{printf("  :  Keyword\n");}
+            }
+            else if(prevState == 4){
+                printf("  :  Constant\n");
             }
             resetLexemeBuffer(lexBuff);
             fsm->currState = 0;
