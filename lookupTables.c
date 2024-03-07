@@ -1,6 +1,5 @@
 #include "main.h"
 #include "lookupTables.h"
-
 uchar hashFunction(char* str){
     uchar index = 0;
     for(uchar i = 0; str[i]!='\0' ; i++){
@@ -9,14 +8,12 @@ uchar hashFunction(char* str){
     index = (0.3456*index)*31;
     return index%31;
 }
-
 mapNode* createMapNode(char* str){ 
     mapNode* mapEntry = (mapNode *)malloc(sizeof(mapNode));
     strcpy(mapEntry->value, str);
     mapEntry->chainedNode = NULL;
     return mapEntry;
 }
-
 void addToMap(mapNode* map[], mapNode* mapEntry){
     uchar index = hashFunction(mapEntry->value);
     if(map[index] == NULL){  
@@ -33,7 +30,6 @@ void addToMap(mapNode* map[], mapNode* mapEntry){
     }
     return;
 }
-
 void keywordMapInit(){
     //list of all keywords in C programming:
     char* keywords[KEYWORD_MAP_SIZE] = {"auto","break","case","char","const","continue","default","do","double","else",
@@ -44,7 +40,6 @@ void keywordMapInit(){
         addToMap(keywordMap,mapEntry); 
     }
 }
-
 void operatorMapInit(){
     char* operators[OPERATOR_MAP_SIZE] = {"+", "-", "*", "/", "%", "=", "+=", "-=", "*=", "/=", "%=", 
                         "<<=", ">>=", "&=", "|=", "^=", "++", "--", "==", "!=", ">", 
@@ -54,7 +49,6 @@ void operatorMapInit(){
         addToMap(operatorMap, mapEntry);
     }
 }
-
 mapNode* getFromMap(mapNode* map[], char* str, uchar sizeOfMap){
     uchar index = hashFunction(str);
     if(index < 0 || index >= sizeOfMap){   //to prevent undefined behaviour associated with array index out of bound access

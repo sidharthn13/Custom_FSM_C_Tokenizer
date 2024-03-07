@@ -21,7 +21,6 @@ void printBufferContents(lexemeBuffer *lexBuff){
     for(uchar i = 0; i< lexBuff->index ; i++){
         printf("%c",lexBuff->lexeme[i]);
     }
-    lexBuff->index = 0;
 }
 void printDelimiter(fileReadBuffer *fileBuff){
     printf("%c", fileBuff->inputSymbol[0]);
@@ -67,6 +66,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
             //if states are 5, 6 -> write necessary logic here
             if(fsm->currState == 1 || fsm->currState == 2){
                 fsm->prevState = fsm->currState;
+                fsm->currState = 1;
                 break;
             }
             if(fsm->currState == 0 || fsm->currState == 4 || (fsm->currState == 7 && fsm->tokenAttribute.operatorCount==1)){
@@ -163,7 +163,6 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
 void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     uchar currState = fsm->currState;
     uchar prevState = fsm->prevState;
-    
     switch(currState){
         case 1:
         case 2:
@@ -171,11 +170,11 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
             break;
         case 3:
             printBufferContents(lexBuff);
-            if(prevState==2){
+            if(prevState == 1){
+                printf("  :  Identifier\n");
+            }
+            else if(prevState==2){
                 lexBuff->lexeme[lexBuff->index] = '\0';
-                // printf("the lexBuff contents are : %s\n", lexBuff->lexeme);
-                // printf("the index is : %hhu\n", lexBuff->index);
-                // for(uchar i = 0; i <= lexBuff->index; i++){printf("%c\n",lexBuff->lexeme[i]);}
                 if(getFromMap(keywordMap,lexBuff->lexeme, KEYWORD_MAP_SIZE)==NULL){
                     printf("  :  Identifier\n");
                 }
@@ -183,6 +182,7 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
             }
             resetLexemeBuffer(lexBuff);
             fsm->currState = 0;
+            printf("%c  :  Punctuator\n", fileBuff->inputSymbol[0]);
             break;
     }
 }
