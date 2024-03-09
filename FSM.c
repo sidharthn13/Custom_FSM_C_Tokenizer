@@ -22,7 +22,7 @@ void printBufferContents(lexemeBuffer *lexBuff){
         printf("%c",lexBuff->lexeme[i]);
     }
 }
-void printTokenType(FSM * fsm, lexemeBuffer *lexBuff){
+void printTokenForPrevState(FSM * fsm, lexemeBuffer *lexBuff){
     uchar prevState = fsm->prevState;
     if(prevState == 1){
         printf("  :  Identifier\n");
@@ -43,23 +43,46 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     switch(inputSymbol){
         //case condition to check for underscore
         case 95:
-
-            //if states are 5, 6 -> write necessary logic here
-
-            fsm->prevState=fsm->currState;
+         if(fsm->currState == 0){
+            fsm->prevState=1;
             fsm->currState=1;
-            break;
+         }
+         else if(fsm->currState == 4){
+            fsm->prevState = 4;
+            fsm ->currState = 9;
+         }
+         else if(fsm->currState == 2){
+            fsm->currState = 1;
+            fsm->prevState =1;
+         }
+         else{
+            fsm->prevState = fsm->currState;
+            fsm ->currState = 1;
+         }
+         break;
+            
         //case condition to check for alphabets
         case 65 ... 90:
         case 97 ... 122:
-
-            //if states are 5, 6 -> write necessary logic here
-
-            if(fsm->currState == 0 || fsm->currState == 1 || fsm->currState == 2){
-                fsm->prevState=fsm->currState;
-                fsm->currState=2;
+            if(fsm->currState == 0){
+                fsm->currState = 2;
+                fsm->prevState=2;
+            }
+            else if(fsm->currState == 4){
+                fsm->prevState = 4;
+                fsm ->currState = 9;
+            }
+            else if(fsm->currState == 1){
+                fsm->prevState = 1;
+                fsm->currState = 1;
+            }
+            else{
+                fsm->prevState = fsm->currState;
+                fsm->currState = 2;
             }
             break;
+
+            
         //case condition to check for punctuators
         case 40:
         case 41:
@@ -70,79 +93,45 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         case 93:
         case 123:
         case 125:
-            fsm->prevState=fsm->currState;
-            fsm->currState=3;
-            break;
+             fsm->prevState = fsm->currState;
+             fsm->currState = 3;
+             break;
+
         //case condition to check for digits
         case 48 ... 57:
-
-            //if states are 5, 6 -> write necessary logic here
-            if(fsm->currState == 1 || fsm->currState == 2){
-                fsm->prevState = fsm->currState;
-                fsm->currState = 1;
-                break;
-            }
-            if(fsm->currState == 0 || fsm->currState == 4 || fsm->currState == 7 ){
-                fsm->prevState = fsm->currState;
+            if(fsm->currState == 0){
                 fsm->currState = 4;
-                break;
+                fsm->prevState = 4;
             }
+            
+              break;
+
+
         //case condition to check for the dot operator
         case 46:
 
-            //if states are 5, 6 -> write necessary logic here
-
-            if(fsm->currState != 4){
-                fsm->prevState = fsm->currState;
-                fsm->currState = 8;
-                fsm->tokenAttribute.operatorCount = 1;
-                break;
-            }
-            fsm->flags.isDecimal=1;
             break;
+
+            
         //case condition to check for string literal
         case 34:
-            if(fsm->currState != 5){
-                fsm->prevState = fsm->currState;
-                fsm->currState = 5;
-                break;
-            }
-            fsm->prevState = 5;
-            fsm->currState =0;
+            
             break;
+
+
         //case condition to check for char literal 
         case 39:
-            if(fsm->currState != 6){
-                fsm->prevState = fsm->currState;
-                fsm->currState = 6;
-                break;
-            }
-            if(fsm->tokenAttribute.charCount > 1){
-                fsm->currState = 9;
-                break;
-            }
+            
+            break;
+
+
         //case condition to check for + and - 
         case 43:
         case 45:
 
-            //if states are 5, 6 -> write necessary logic here
-
-            if(fsm->currState == 0){
-                fsm->prevState = 0;
-                fsm->currState = 7;
-                fsm->tokenAttribute.operatorCount = 1;
-                break;
-            }
-            if(fsm->currState == 7 || fsm->currState == 8){    // <--------------------------------------need to fix this case
-                fsm->prevState = fsm->currState;
-                fsm->currState = 8;
-                fsm->tokenAttribute.operatorCount += 1;
-                break;
-            }
-            fsm->prevState = fsm->currState;
-            fsm->currState = 8;
-            fsm->tokenAttribute.operatorCount=1;
             break;
+
+            
         //case condition to check for other operators
         case 33:
         case 37:
@@ -157,42 +146,71 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         case 124:
         case 126:
 
-            //if states are 5, 6 -> write necessary logic here
-
-            if(fsm->currState!=8){
-                fsm->prevState=fsm->currState;
-                fsm->currState = 8;
-                fsm->tokenAttribute.operatorCount=1;
-                break;
-            }
-            fsm->tokenAttribute.operatorCount += 1;
             break;
+
+
         //case condition to check for whitespace, newline and tab characters
         case 9:
         case 10:
         case 32:
-            fsm->prevState = fsm->currState;
-            fsm->currState = 10;
+            
+            break;
+
     }
+}
+
+void printTokenForCurrState(FSM * fsm){
+    uchar currState = fsm->currState;
+    if(currState == 3){
+        printf(":  Punctuator\n");
+    }
+}
+
+//changes state to zero, prints delimiter and token when delimiting character is found
+void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){  
+    if(fsm->currState == 3){
+        addToLexemeBuffer(lexBuff,fileBuff);
+        printBufferContents(lexBuff);
+        printTokenForCurrState(fsm);
+        resetLexemeBuffer(lexBuff);
+        fsm->currState=0;   //state should be set to zero after delimiting character is printed
+    }
+    //else if block can be used for operators , strings and characters
 }
 
 void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     uchar currState = fsm->currState;
-    switch(currState){
-        case 1:
-        case 2:
-        case 4:
-        case 7:
-            addToLexemeBuffer(lexBuff,fileBuff);
-            break;
-        case 3:
-            printBufferContents(lexBuff);
-            printTokenType(fsm, lexBuff);
-            resetLexemeBuffer(lexBuff);
-            fsm->currState = 0;
-            printf("%c  :  Punctuator\n", fileBuff->inputSymbol[0]);
-            break;
-        // case 8:
-
+    uchar prevState = fsm->prevState;
+    if(currState == 9){
+        fprintf(stderr, "Error : Invalid Token\n");
+        exit(1);
     }
+    if(currState != prevState){
+        printBufferContents(lexBuff);
+        printTokenForPrevState(fsm, lexBuff);
+        resetLexemeBuffer(lexBuff);
+        stabilizeState(fsm, lexBuff, fileBuff);
+    }
+    else{
+        addToLexemeBuffer(lexBuff,fileBuff);
+    }
+
+
+    // switch(currState){
+    //     case 1:
+    //     case 2:
+    //     case 4:
+    //     case 7:
+    //         addToLexemeBuffer(lexBuff,fileBuff);
+    //         break;
+    //     case 3:
+    //         printBufferContents(lexBuff);
+    //         printTokenForPrevState(fsm, lexBuff);
+    //         resetLexemeBuffer(lexBuff);
+    //         fsm->currState = 0;
+    //         printf("%c  :  Punctuator\n", fileBuff->inputSymbol[0]);
+    //         break;
+    //      case 8:
+
+    // }
 }

@@ -22,5 +22,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff);
 void addToLexemeBuffer(lexemeBuffer *lexBuff, fileReadBuffer *fileBuff);
 void resetLexemeBuffer(lexemeBuffer *lexBuff);
 void printBufferContents(lexemeBuffer *lexBuff);
-void printTokenType(FSM * fsm, lexemeBuffer *lexBuff);
+void printTokenForPrevState(FSM * fsm, lexemeBuffer *lexBuff);
+void printTokenForCurrState(FSM *fsm);
+void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff);
 void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff);
