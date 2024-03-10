@@ -195,7 +195,7 @@ void printTokenForCurrState(FSM *fsm){
     }
 }
 
-//prints delimiter and token when delimiting character is found, changes state to 0
+//prints delimiter and token when delimiting character is found, changes fsm state back to 0. If symbol is not delimiting, it adds to lexemeBuffer
 void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){  
     if(fsm->currState==3){
         addToLexemeBuffer(lexBuff,fileBuff->inputSymbol[0]);
@@ -205,12 +205,11 @@ void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         fsmReset(fsm);   //state should be set to zero after delimiting character is printed
     }
     else if(fsm->currState==6){
-        /* The following lines of code are just for testing and have to be removes */
+        /* The following lines of code are just for testing and have to be removed */
         printf(".  ");
         printTokenForCurrState(fsm);
         fsmReset(fsm);   //state should be set to zero after delimiting character is printed
     }
-    //else if block can be used for operators , strings and characters
     else{
         addToLexemeBuffer(lexBuff,fileBuff->inputSymbol[0]);
     }
