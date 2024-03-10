@@ -99,11 +99,18 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
 
         //case condition to check for digits
         case 48 ... 57:
-            if(fsm->currState == 0){
-                fsm->currState = 4;
-                fsm->prevState = 4;
+            if(fsm->currState==0){
+                fsm->currState=4;
+                fsm->prevState=4;
             }
-            
+            else if(fsm->currState==1 || fsm->currState==2){
+                fsm->currState=1;
+                fsm->prevState=1;
+            }
+            else{
+                fsm->prevState=fsm->currState;
+                fsm->currState=4;
+            }
               break;
 
 
@@ -174,6 +181,7 @@ void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         printTokenForCurrState(fsm);
         resetLexemeBuffer(lexBuff);
         fsm->currState=0;   //state should be set to zero after delimiting character is printed
+        fsm->prevState=0;
     }
     //else if block can be used for operators , strings and characters
 }
@@ -185,6 +193,7 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
         fprintf(stderr, "Error : Invalid Token\n");
         exit(1);
     }
+    //the below condition will be set when a delimiting character is encountered(punctuators, operators , string and char literals)
     if(currState != prevState){
         printBufferContents(lexBuff);
         printTokenForPrevState(fsm, lexBuff);
