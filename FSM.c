@@ -166,6 +166,11 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     }
 }
 
+void fsmReset(FSM * fsm){
+    fsm->currState=0;
+    fsm->prevState=0;
+}
+
 void printTokenForCurrState(FSM * fsm){
     uchar currState = fsm->currState;
     if(currState == 3){
@@ -180,8 +185,7 @@ void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         printBufferContents(lexBuff);
         printTokenForCurrState(fsm);
         resetLexemeBuffer(lexBuff);
-        fsm->currState=0;   //state should be set to zero after delimiting character is printed
-        fsm->prevState=0;
+        fsmReset(fsm);   //state should be set to zero after delimiting character is printed
     }
     //else if block can be used for operators , strings and characters
 }
