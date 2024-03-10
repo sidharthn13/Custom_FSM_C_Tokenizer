@@ -10,8 +10,8 @@ FSM* fsmInit(){
 void fsmDestroy(FSM* fsm){
     free(fsm);
 }
-void addToLexemeBuffer(lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
-    lexBuff->lexeme[lexBuff->index] = fileBuff->inputSymbol[0];
+void addToLexemeBuffer(lexemeBuffer *lexBuff, char symbol){
+    lexBuff->lexeme[lexBuff->index] = symbol;
     lexBuff->index += 1;
 }
 void resetLexemeBuffer(lexemeBuffer *lexBuff){
@@ -84,7 +84,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
 
         //case condition to check for digits
         case 48 ... 57:
-            if(fsm->currState==0){
+            if(fsm->currState==0 || fsm->currState==5){
                 fsm->currState=4;
                 fsm->prevState=4;
             }
@@ -167,17 +167,22 @@ void printTokenForPrevState(FSM * fsm, lexemeBuffer *lexBuff){
     uchar prevState = fsm->prevState;
     if(prevState == 1){
         printf("  :  Identifier\n");
-                        }
+    }
     else if(prevState==2){
         lexBuff->lexeme[lexBuff->index] = '\0';
         if(getFromMap(keywordMap,lexBuff->lexeme, KEYWORD_MAP_SIZE)==NULL){
             printf("  :  Identifier\n");
-                }
-        else{printf("  :  Keyword\n");}
-                        }
+        }
+        else{
+            printf("  :  Keyword\n");
+        }
+    }
     else if(prevState == 4){
                     printf("  :  Constant\n");
-                        }
+    }
+    else if(prevState==6){
+        printf("  :  Operator\n");
+    }
 }
 
 void printTokenForCurrState(FSM *fsm){
@@ -193,18 +198,22 @@ void printTokenForCurrState(FSM *fsm){
 //prints delimiter and token when delimiting character is found, changes state to 0
 void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){  
     if(fsm->currState==3){
-        addToLexemeBuffer(lexBuff,fileBuff);
+        addToLexemeBuffer(lexBuff,fileBuff->inputSymbol[0]);
         printBufferContents(lexBuff);
         printTokenForCurrState(fsm);
         resetLexemeBuffer(lexBuff);
         fsmReset(fsm);   //state should be set to zero after delimiting character is printed
     }
     else if(fsm->currState==6){
-        // printf(".  ");
-        // printTokenForCurrState(fsm);
-        // fsmReset(fsm);   //state should be set to zero after delimiting character is printed
+        /* The following lines of code are just for testing and have to be removes */
+        printf(".  ");
+        printTokenForCurrState(fsm);
+        fsmReset(fsm);   //state should be set to zero after delimiting character is printed
     }
     //else if block can be used for operators , strings and characters
+    else{
+        addToLexemeBuffer(lexBuff,fileBuff->inputSymbol[0]);
+    }
 }
 
 void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
@@ -216,12 +225,28 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
     }
     //the below condition will be set when a delimiting character is encountered(punctuators, operators , string and char literals)
     if(currState!=prevState){
-        printBufferContents(lexBuff);
-        printTokenForPrevState(fsm, lexBuff);
-        resetLexemeBuffer(lexBuff);
+        if(prevState==5){
+            //following block of code generates token for numeric constant
+            lexBuff->index-=1;
+            printBufferContents(lexBuff);
+            fsm->prevState=4;
+            printTokenForPrevState(fsm,lexBuff);
+            resetLexemeBuffer(lexBuff);
+            //following block of code generates token for '.' operator
+            addToLexemeBuffer(lexBuff, '.');
+            fsm->prevState=6;
+            printBufferContents(lexBuff);
+            printTokenForPrevState(fsm, lexBuff);
+            resetLexemeBuffer(lexBuff);
+        }
+        else{
+            printBufferContents(lexBuff);
+            printTokenForPrevState(fsm, lexBuff);
+            resetLexemeBuffer(lexBuff);
+        }
         stabilizeState(fsm, lexBuff, fileBuff);
     }
     else{
-        addToLexemeBuffer(lexBuff,fileBuff);
+        addToLexemeBuffer(lexBuff,fileBuff->inputSymbol[0]);
     }
 }
