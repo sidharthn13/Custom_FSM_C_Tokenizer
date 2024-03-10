@@ -22,22 +22,7 @@ void printBufferContents(lexemeBuffer *lexBuff){
         printf("%c",lexBuff->lexeme[i]);
     }
 }
-void printTokenForPrevState(FSM * fsm, lexemeBuffer *lexBuff){
-    uchar prevState = fsm->prevState;
-    if(prevState == 1){
-        printf("  :  Identifier\n");
-                        }
-    else if(prevState==2){
-        lexBuff->lexeme[lexBuff->index] = '\0';
-        if(getFromMap(keywordMap,lexBuff->lexeme, KEYWORD_MAP_SIZE)==NULL){
-            printf("  :  Identifier\n");
-                }
-        else{printf("  :  Keyword\n");}
-                        }
-    else if(prevState == 4){
-                    printf("  :  Constant\n");
-                        }
-}
+
 void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     uchar inputSymbol = fileBuff->inputSymbol[0];
     switch(inputSymbol){
@@ -116,7 +101,14 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
 
         //case condition to check for the dot operator
         case 46:
-
+            if(fsm->currState!=4){
+                fsm->prevState=fsm->currState;
+                fsm->currState=6; //dot is treated as an operator if the lexeme in the buffer is not a numeric constant
+            }
+            else{
+                fsm->prevState=5;
+                fsm->currState=5;
+            }
             break;
 
             
@@ -171,34 +163,59 @@ void fsmReset(FSM * fsm){
     fsm->prevState=0;
 }
 
-void printTokenForCurrState(FSM * fsm){
+void printTokenForPrevState(FSM * fsm, lexemeBuffer *lexBuff){
+    uchar prevState = fsm->prevState;
+    if(prevState == 1){
+        printf("  :  Identifier\n");
+                        }
+    else if(prevState==2){
+        lexBuff->lexeme[lexBuff->index] = '\0';
+        if(getFromMap(keywordMap,lexBuff->lexeme, KEYWORD_MAP_SIZE)==NULL){
+            printf("  :  Identifier\n");
+                }
+        else{printf("  :  Keyword\n");}
+                        }
+    else if(prevState == 4){
+                    printf("  :  Constant\n");
+                        }
+}
+
+void printTokenForCurrState(FSM *fsm){
     uchar currState = fsm->currState;
-    if(currState == 3){
+    if(currState==3){
         printf(":  Punctuator\n");
+    }
+    else if(currState==6){
+        printf(":  Operator\n");
     }
 }
 
-//changes state to zero, prints delimiter and token when delimiting character is found
+//prints delimiter and token when delimiting character is found, changes state to 0
 void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){  
-    if(fsm->currState == 3){
+    if(fsm->currState==3){
         addToLexemeBuffer(lexBuff,fileBuff);
         printBufferContents(lexBuff);
         printTokenForCurrState(fsm);
         resetLexemeBuffer(lexBuff);
         fsmReset(fsm);   //state should be set to zero after delimiting character is printed
     }
+    else if(fsm->currState==6){
+        // printf(".  ");
+        // printTokenForCurrState(fsm);
+        // fsmReset(fsm);   //state should be set to zero after delimiting character is printed
+    }
     //else if block can be used for operators , strings and characters
 }
 
 void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
-    uchar currState = fsm->currState;
-    uchar prevState = fsm->prevState;
-    if(currState == 9){
+    uchar currState=fsm->currState;
+    uchar prevState=fsm->prevState;
+    if(currState==9){
         fprintf(stderr, "Error : Invalid Token\n");
         exit(1);
     }
     //the below condition will be set when a delimiting character is encountered(punctuators, operators , string and char literals)
-    if(currState != prevState){
+    if(currState!=prevState){
         printBufferContents(lexBuff);
         printTokenForPrevState(fsm, lexBuff);
         resetLexemeBuffer(lexBuff);
@@ -207,23 +224,4 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
     else{
         addToLexemeBuffer(lexBuff,fileBuff);
     }
-
-
-    // switch(currState){
-    //     case 1:
-    //     case 2:
-    //     case 4:
-    //     case 7:
-    //         addToLexemeBuffer(lexBuff,fileBuff);
-    //         break;
-    //     case 3:
-    //         printBufferContents(lexBuff);
-    //         printTokenForPrevState(fsm, lexBuff);
-    //         resetLexemeBuffer(lexBuff);
-    //         fsm->currState = 0;
-    //         printf("%c  :  Punctuator\n", fileBuff->inputSymbol[0]);
-    //         break;
-    //      case 8:
-
-    // }
 }

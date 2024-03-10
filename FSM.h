@@ -8,7 +8,7 @@ typedef struct FSM{
     union{
         uchar operatorCount;
         uchar charCount;
-    }tokenAttribute;
+    }lexemeAttribute;
     union{
         uchar isDecimal;
         uchar isChar;
