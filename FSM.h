@@ -5,14 +5,11 @@
 typedef struct FSM{
     uchar prevState;
     uchar currState;
+    uchar couldBeSignedInt;
     union{
         uchar operatorCount;
         uchar charCount;
-    }lexemeAttribute;
-    union{
-        uchar isDecimal;
-        uchar isChar;
-    }flags;
+    }symbolChain;
 }FSM;
 
 //function prototypes:

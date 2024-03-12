@@ -5,6 +5,7 @@ FSM* fsmInit(){
     FSM* fsm = (FSM *)malloc(sizeof(FSM));
     fsm->currState=0;
     fsm->prevState=0;
+    fsm->couldBeSignedInt=1;
     return fsm;
 } 
 void fsmDestroy(FSM* fsm){
@@ -44,6 +45,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
             fsm->prevState = fsm->currState;
             fsm ->currState = 1;
          }
+        fsm->couldBeSignedInt=0;
          break;
             
         //case condition to check for alphabets
@@ -65,6 +67,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
                 fsm->prevState = fsm->currState;
                 fsm->currState = 2;
             }
+            fsm->couldBeSignedInt=0;
             break;
 
             
@@ -80,11 +83,12 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         case 125:
              fsm->prevState = fsm->currState;
              fsm->currState = 3;
+             fsm->couldBeSignedInt=1;
              break;
 
         //case condition to check for digits
         case 48 ... 57:
-            if(fsm->currState==0 || fsm->currState==5){
+            if(fsm->currState==0 || fsm->currState==5 || fsm->currState==7){
                 fsm->currState=4;
                 fsm->prevState=4;
             }
@@ -96,7 +100,8 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
                 fsm->prevState=fsm->currState;
                 fsm->currState=4;
             }
-              break;
+            fsm->couldBeSignedInt=0;
+            break;
 
 
         //case condition to check for the dot operator
@@ -109,6 +114,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
                 fsm->prevState=5;
                 fsm->currState=5;
             }
+            fsm->couldBeSignedInt=0;
             break;
 
             
@@ -127,10 +133,24 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         //case condition to check for + and - 
         case 43:
         case 45:
-
+            if(fsm->couldBeSignedInt==1){
+                fsm->prevState=7;
+                fsm->currState=7;
+                fsm->couldBeSignedInt=0;
+                fsm->symbolChain.operatorCount=1;
+            }   
+            else{
+                if(fsm->currState==6){
+                    fsm->symbolChain.operatorCount+=1;
+                }
+                else{
+                    fsm->symbolChain.operatorCount=1;
+                }
+                fsm->prevState=fsm->currState;
+                fsm->currState=6;
+            }
             break;
 
-            
         //case condition to check for other operators
         case 33:
         case 37:
@@ -144,6 +164,17 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         case 94:
         case 124:
         case 126:
+            if(fsm->currState!=6){
+                fsm->prevState=fsm->currState;
+                fsm->currState=6;
+                fsm->symbolChain.operatorCount=1;
+            }
+            else{
+                fsm->prevState=6;
+                fsm->currState=6;
+                fsm->symbolChain.operatorCount+=1;
+            }
+            fsm->couldBeSignedInt=0;
 
             break;
 
@@ -180,7 +211,7 @@ void printTokenForPrevState(FSM * fsm, lexemeBuffer *lexBuff){
     else if(prevState == 4){
                     printf("  :  Constant\n");
     }
-    else if(prevState==6){
+    else if(prevState==6 ||prevState==7){
         printf("  :  Operator\n");
     }
 }
@@ -188,10 +219,10 @@ void printTokenForPrevState(FSM * fsm, lexemeBuffer *lexBuff){
 void printTokenForCurrState(FSM *fsm){
     uchar currState = fsm->currState;
     if(currState==3){
-        printf(":  Punctuator\n");
+        printf("  :  Punctuator\n");
     }
     else if(currState==6){
-        printf(":  Operator\n");
+        printf("  :  Operator\n");
     }
 }
 
@@ -205,10 +236,8 @@ void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         fsmReset(fsm);   //state should be set to zero after delimiting character is printed
     }
     else if(fsm->currState==6){
-        /* The following lines of code are just for testing and have to be removed */
-        printf(".  ");
-        printTokenForCurrState(fsm);
-        fsmReset(fsm);   //state should be set to zero after delimiting character is printed
+        addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
+        //write custom logic to print the operator chain
     }
     else{
         addToLexemeBuffer(lexBuff,fileBuff->inputSymbol[0]);
@@ -236,6 +265,17 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
             fsm->prevState=6;
             printBufferContents(lexBuff);
             printTokenForPrevState(fsm, lexBuff);
+            resetLexemeBuffer(lexBuff);
+        }
+        else if(prevState==7){
+            //following block of code generates token for '+' or '-' operator
+            printBufferContents(lexBuff);
+            printTokenForPrevState(fsm,lexBuff);
+            resetLexemeBuffer(lexBuff);
+        }
+        else if(prevState==6){
+            printBufferContents(lexBuff);
+            printTokenForPrevState(fsm,lexBuff);
             resetLexemeBuffer(lexBuff);
         }
         else{
