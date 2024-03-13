@@ -1,6 +1,5 @@
 #include "main.h"
 #include "lookupTables.h"
-
 //struct definition:
 typedef struct FSM{
     uchar prevState;
@@ -11,7 +10,6 @@ typedef struct FSM{
         uchar charCount;
     }symbolChain;
 }FSM;
-
 //function prototypes:
 FSM* fsmInit(); //initialises the FSM with prev and curr state set to 0
 void fsmDestroy(FSM* fsm); //deallocates the memory memory for fsm
@@ -22,5 +20,6 @@ void resetLexemeBuffer(lexemeBuffer *lexBuff);
 void printBufferContents(lexemeBuffer *lexBuff);
 void printTokenForPrevState(FSM * fsm, lexemeBuffer *lexBuff);
 void printTokenForCurrState(FSM *fsm);
+void segmentOperatorChain(uchar startIndex, char operatorChain[], uchar chainLength);
 void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff);
 void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff);

@@ -43,7 +43,7 @@ void keywordMapInit(){
 void operatorMapInit(){
     char* operators[OPERATOR_MAP_SIZE] = {"+", "-", "*", "/", "%", "=", "+=", "-=", "*=", "/=", "%=", 
                         "<<=", ">>=", "&=", "|=", "^=", "++", "--", "==", "!=", ">", 
-                        "<", ">=", "<=", "&&", "||", "&", "|", "^", "~", "<<", ">>"};
+                        "<", ">=", "<=", "&&", "||", "&", "|", "^", "~", "<<", ">>", "->"};
     for(int i = 0; i < OPERATOR_MAP_SIZE; i++){
         mapNode *mapEntry = createMapNode(operators[i]);
         addToMap(operatorMap, mapEntry);

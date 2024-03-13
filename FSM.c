@@ -143,6 +143,11 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
                 if(fsm->currState==6){
                     fsm->symbolChain.operatorCount+=1;
                 }
+                else if(fsm->currState==7){
+                    fsm->prevState=6;
+                    fsm->currState=6;
+                    fsm->symbolChain.operatorCount+=1;
+                }
                 else{
                     fsm->symbolChain.operatorCount=1;
                 }
@@ -164,10 +169,15 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         case 94:
         case 124:
         case 126:
-            if(fsm->currState!=6){
+            if(fsm->currState!=6 && fsm->currState!=7){
                 fsm->prevState=fsm->currState;
                 fsm->currState=6;
                 fsm->symbolChain.operatorCount=1;
+            }
+            else if(fsm->currState==7){
+                fsm->prevState=6;
+                fsm->currState=6;
+                fsm->symbolChain.operatorCount+=1;
             }
             else{
                 fsm->prevState=6;
@@ -178,7 +188,6 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
 
             break;
 
-
         //case condition to check for whitespace, newline and tab characters
         case 9:
         case 10:
@@ -188,12 +197,10 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
 
     }
 }
-
 void fsmReset(FSM * fsm){
     fsm->currState=0;
     fsm->prevState=0;
 }
-
 void printTokenForPrevState(FSM * fsm, lexemeBuffer *lexBuff){
     uchar prevState = fsm->prevState;
     if(prevState == 1){
@@ -215,7 +222,6 @@ void printTokenForPrevState(FSM * fsm, lexemeBuffer *lexBuff){
         printf("  :  Operator\n");
     }
 }
-
 void printTokenForCurrState(FSM *fsm){
     uchar currState = fsm->currState;
     if(currState==3){
@@ -225,7 +231,6 @@ void printTokenForCurrState(FSM *fsm){
         printf("  :  Operator\n");
     }
 }
-
 //prints delimiter and token when delimiting character is found, changes fsm state back to 0. If symbol is not delimiting, it adds to lexemeBuffer
 void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){  
     if(fsm->currState==3){
@@ -235,15 +240,40 @@ void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         resetLexemeBuffer(lexBuff);
         fsmReset(fsm);   //state should be set to zero after delimiting character is printed
     }
-    else if(fsm->currState==6){
-        addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
-        //write custom logic to print the operator chain
-    }
     else{
         addToLexemeBuffer(lexBuff,fileBuff->inputSymbol[0]);
     }
 }
-
+//The following function goes through the operator chain in the buffer and then prints all valid operators
+void segmentOperatorChain(uchar startIndex, char operatorChain[], uchar chainLength){
+    char buffer[]={'\0','\0','\0','\0'};
+    if(startIndex > chainLength){
+        return;
+    }
+    for(int i=startIndex; i<=startIndex+2; i++){
+        if(i<chainLength){    
+            buffer[i-startIndex]=operatorChain[i]; 
+    }
+    }
+    if(startIndex+2<=chainLength && getFromMap(operatorMap, buffer, 32)  )
+    {
+        printf("%s  :  Operator\n", buffer);  
+        segmentOperatorChain(startIndex+3, operatorChain, chainLength);
+        return;   
+    }
+    buffer[2]='\0';
+    if(startIndex+1<=chainLength && getFromMap(operatorMap, buffer, 32)){
+        printf("%s  :  Operator\n", buffer);   
+        segmentOperatorChain(startIndex+2, operatorChain, chainLength);
+        return;
+    }
+    buffer[1]='\0';
+    if(startIndex<=chainLength && getFromMap(operatorMap, buffer, 32), buffer){
+        printf("%s  :  Operator\n", buffer);   
+        segmentOperatorChain(startIndex+1, operatorChain, chainLength);
+        return;
+    }
+}
 void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     uchar currState=fsm->currState;
     uchar prevState=fsm->prevState;
@@ -274,8 +304,8 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
             resetLexemeBuffer(lexBuff);
         }
         else if(prevState==6){
-            printBufferContents(lexBuff);
-            printTokenForPrevState(fsm,lexBuff);
+            //write a function here to recursively check for operator chain and print according to valid chain
+            segmentOperatorChain(0, lexBuff->lexeme, lexBuff->index);
             resetLexemeBuffer(lexBuff);
         }
         else{
