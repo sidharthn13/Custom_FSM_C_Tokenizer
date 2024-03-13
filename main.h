@@ -1,19 +1,20 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef unsigned char uchar;
 
 #ifndef BUFFER_DEFINITIONS_HEADER_SAFETY
 #define BUFFER_DEFINITIONS_HEADER_SAFETY
-typedef struct lexemeBuffer{
+typedef struct lexemeBuffer
+{
     char lexeme[35];
     uchar index;
-}lexemeBuffer;
+} lexemeBuffer;
 
-typedef struct fileReadBuffer{
+typedef struct fileReadBuffer
+{
     FILE *fileStream;
     uchar inputSymbol[1];
-}fileReadBuffer;
+} fileReadBuffer;
 #endif
-
