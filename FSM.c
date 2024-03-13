@@ -53,6 +53,10 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
             fsm->currState = 1;
             fsm->prevState = 1;
         }
+        else if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+        }
         else
         {
             fsm->prevState = fsm->currState;
@@ -78,6 +82,10 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
             fsm->prevState = 1;
             fsm->currState = 1;
         }
+        else if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+        }
         else
         {
             fsm->prevState = fsm->currState;
@@ -95,9 +103,15 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
     case 93:
     case 123:
     case 125:
-        fsm->prevState = fsm->currState;
-        fsm->currState = 3;
-        fsm->couldBeSignedInt = 1;
+        if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+        }
+        else{
+            fsm->prevState = fsm->currState;
+            fsm->currState = 3;
+            fsm->couldBeSignedInt = 1;
+        }
         break;
     // case condition to check for digits
     case 48 ... 57:
@@ -110,6 +124,10 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         {
             fsm->currState = 1;
             fsm->prevState = 1;
+        }
+        else if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
         }
         else
         {
@@ -125,6 +143,10 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
             fsm->prevState = fsm->currState;
             fsm->currState = 6; // dot is treated as an operator if the lexeme in the buffer is not a numeric constant
         }
+        else if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+        }
         else
         {
             fsm->prevState = 5;
@@ -134,7 +156,14 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         break;
     // case condition to check for string literal
     case 34:
-
+        if(fsm->currState !=8 ){
+            fsm->prevState = fsm->currState;
+            fsm->currState = 8;
+        }
+        else{
+            fsm->prevState = 8;
+            fsm->currState = 0;
+        }
         break;
 
     // case condition to check for char literal
@@ -145,6 +174,11 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
     // case condition to check for + and -
     case 43:
     case 45:
+        if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+            break;
+        }
         if (fsm->couldBeSignedInt == 1)
         {
             fsm->prevState = 7;
@@ -182,6 +216,10 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
             fsm->prevState = fsm->currState;
             fsm->currState = 6;
         }
+        else if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+        }
         else
         {
             fsm->prevState = 6;
@@ -193,7 +231,10 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
     case 9:
     case 10:
     case 32:
-
+        if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+        }
         break;
     }
 }
@@ -228,6 +269,10 @@ void printTokenForPrevState(FSM *fsm, lexemeBuffer *lexBuff)
     else if (prevState == 6 || prevState == 7)
     {
         printf("  :  Operator\n");
+    }
+    else if(prevState == 8){
+        printf("  :  String Constant\n");
+
     }
 }
 void printTokenForCurrState(FSM *fsm)
@@ -332,6 +377,11 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
         else if (prevState == 6)
         {
             segmentOperatorChain(0, lexBuff->lexeme, lexBuff->index);
+            resetLexemeBuffer(lexBuff);
+        }
+        else if(prevState == -8){
+            // addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
+            printBufferContents(lexBuff);
             resetLexemeBuffer(lexBuff);
         }
         else
