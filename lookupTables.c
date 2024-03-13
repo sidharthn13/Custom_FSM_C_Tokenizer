@@ -30,8 +30,8 @@ void addToMap(mapNode* map[], mapNode* mapEntry){
     }
     return;
 }
+//Initializes a hashtable with list of all keywords in C programming:
 void keywordMapInit(){
-    //list of all keywords in C programming:
     char* keywords[KEYWORD_MAP_SIZE] = {"auto","break","case","char","const","continue","default","do","double","else",
     "enum","extern","float","for","goto","if","int","long","register","return","short","signed","sizeof","static","struct",
     "switch","typedef","union","unsigned","void","volatile","while"}; 
@@ -40,6 +40,7 @@ void keywordMapInit(){
         addToMap(keywordMap,mapEntry); 
     }
 }
+//Initializes a hashtable with list of all operators in C programming:
 void operatorMapInit(){
     char* operators[OPERATOR_MAP_SIZE] = {"+", "-", "*", "/", "%", "=", "+=", "-=", "*=", "/=", "%=", 
                         "<<=", ">>=", "&=", "|=", "^=", "++", "--", "==", "!=", ">", 
@@ -51,7 +52,8 @@ void operatorMapInit(){
 }
 mapNode* getFromMap(mapNode* map[], char* str, uchar sizeOfMap){
     uchar index = hashFunction(str);
-    if(index < 0 || index >= sizeOfMap){   //to prevent undefined behaviour associated with array index out of bound access
+    //The following if block is used to prevent undefined behaviour associated with array index out of bound access
+    if(index < 0 || index >= sizeOfMap){   
         return NULL;
     }
     if(map[index]==NULL){

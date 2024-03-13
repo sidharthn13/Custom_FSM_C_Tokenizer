@@ -11,8 +11,8 @@ typedef struct FSM{
     }symbolChain;
 }FSM;
 //function prototypes:
-FSM* fsmInit(); //initialises the FSM with prev and curr state set to 0
-void fsmDestroy(FSM* fsm); //deallocates the memory memory for fsm
+FSM* fsmInit(); 
+void fsmDestroy(FSM* fsm); 
 void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff);
 void fsmReset(FSM * fsm);
 void addToLexemeBuffer(lexemeBuffer *lexBuff, char symbol);

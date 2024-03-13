@@ -6,19 +6,21 @@ the scope of the main function if data present in this particular memory locatio
 mapNode* operatorMap[OPERATOR_MAP_SIZE] = {NULL};
 void main(int argc, char* argv[]){
     FSM* fsm = fsmInit(); 
-    keywordMapInit();    //Initialize hashmap containing keywords
-    operatorMapInit();  //Initialize hashmap containing operators
+    keywordMapInit();   
+    operatorMapInit();  
     lexemeBuffer lexBuff;
     lexBuff.index=0;
     fileReadBuffer fileBuff;
     fileBuff.fileStream = fopen(argv[1], "rb");
     if(!fileBuff.fileStream){
-        fprintf(stderr, "Error : Could not open file. Make sure file exists and valid path is provided\n");
+        fprintf(stderr, "Error : Could not open file. Make sure file exists and valid path is provided...\n");
         exit(1);
     }
+    printf("File successfully opened...\nThe parsed lexemes and their corresponding tokens are :\n\n");
     while(!feof(fileBuff.fileStream)){
         fileBuff.inputSymbol[0] = fgetc(fileBuff.fileStream);
         fsmUpdateState(fsm, &lexBuff, &fileBuff);
         performStateOperation(fsm, &lexBuff, &fileBuff);
     }
+    fsmDestroy(fsm);
 }

@@ -1,6 +1,6 @@
 #include "main.h"
 #include "FSM.h"
-
+//initialises the FSM with prev and curr state set to 0
 FSM* fsmInit(){
     FSM* fsm = (FSM *)malloc(sizeof(FSM));
     fsm->currState=0;
@@ -8,6 +8,7 @@ FSM* fsmInit(){
     fsm->couldBeSignedInt=1;
     return fsm;
 } 
+//deallocates the memory memory for fsm
 void fsmDestroy(FSM* fsm){
     free(fsm);
 }
@@ -23,7 +24,7 @@ void printBufferContents(lexemeBuffer *lexBuff){
         printf("%c",lexBuff->lexeme[i]);
     }
 }
-
+//The following function updates the state of the FSM based on the current input symbol read from source file
 void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
     uchar inputSymbol = fileBuff->inputSymbol[0];
     switch(inputSymbol){
@@ -46,8 +47,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
             fsm ->currState = 1;
          }
         fsm->couldBeSignedInt=0;
-         break;
-            
+         break;   
         //case condition to check for alphabets
         case 65 ... 90:
         case 97 ... 122:
@@ -69,8 +69,6 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
             }
             fsm->couldBeSignedInt=0;
             break;
-
-            
         //case condition to check for punctuators
         case 40:
         case 41:
@@ -85,7 +83,6 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
              fsm->currState = 3;
              fsm->couldBeSignedInt=1;
              break;
-
         //case condition to check for digits
         case 48 ... 57:
             if(fsm->currState==0 || fsm->currState==5 || fsm->currState==7){
@@ -102,8 +99,6 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
             }
             fsm->couldBeSignedInt=0;
             break;
-
-
         //case condition to check for the dot operator
         case 46:
             if(fsm->currState!=4){
@@ -116,8 +111,6 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
             }
             fsm->couldBeSignedInt=0;
             break;
-
-            
         //case condition to check for string literal
         case 34:
             
@@ -155,7 +148,6 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
                 fsm->currState=6;
             }
             break;
-
         //case condition to check for other operators
         case 33:
         case 37:
@@ -185,7 +177,6 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
                 fsm->symbolChain.operatorCount+=1;
             }
             fsm->couldBeSignedInt=0;
-
             break;
 
         //case condition to check for whitespace, newline and tab characters
@@ -231,7 +222,8 @@ void printTokenForCurrState(FSM *fsm){
         printf("  :  Operator\n");
     }
 }
-//prints delimiter and token when delimiting character is found, changes fsm state back to 0. If symbol is not delimiting, it adds to lexemeBuffer
+/* The following function prints delimiter and token when delimiting character is found, 
+changes fsm state back to 0. If symbol is not delimiting, it adds to lexemeBuffer*/
 void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){  
     if(fsm->currState==3){
         addToLexemeBuffer(lexBuff,fileBuff->inputSymbol[0]);
@@ -244,7 +236,7 @@ void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff){
         addToLexemeBuffer(lexBuff,fileBuff->inputSymbol[0]);
     }
 }
-//The following function goes through the operator chain in the buffer and then prints all valid operators
+//The following function goes through the operator chain in the lexeme buffer and then prints all valid operators
 void segmentOperatorChain(uchar startIndex, char operatorChain[], uchar chainLength){
     char buffer[]={'\0','\0','\0','\0'};
     if(startIndex > chainLength){
@@ -304,7 +296,6 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
             resetLexemeBuffer(lexBuff);
         }
         else if(prevState==6){
-            //write a function here to recursively check for operator chain and print according to valid chain
             segmentOperatorChain(0, lexBuff->lexeme, lexBuff->index);
             resetLexemeBuffer(lexBuff);
         }

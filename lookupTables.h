@@ -11,7 +11,8 @@ typedef struct mapNode{
 }mapNode;
 #endif
 
-//declaring maps initialised in main file and letting the linker know data present in this particular mem location is shared:
+/*  Declaring maps defined in main file and letting the linker know that the variables 
+defined in another source file is used here(sharing of variables between files):  */
 extern mapNode* keywordMap[KEYWORD_MAP_SIZE];
 extern mapNode* operatorMap[OPERATOR_MAP_SIZE];
 
