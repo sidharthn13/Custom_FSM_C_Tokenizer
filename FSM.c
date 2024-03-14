@@ -227,10 +227,22 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         }
         fsm->couldBeSignedInt = 0;
         break;
-    // case condition to check for whitespace, newline and tab characters
+    // case condition to check for whitespace and tab characters
     case 9:
-    case 10:
     case 32:
+        if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+        }
+        else{
+            fsm->prevState = fsm->currState;
+            fsm->currState = 0;
+            fsm->couldBeSignedInt = 1;
+        }
+
+        break;
+    //case condition to check for new line character
+    case 10:
         if(fsm->currState == 8){
             fsm->prevState = -8;
             fsm->currState = 8;
@@ -304,6 +316,10 @@ void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         printf("  :  String Constant\n");
         resetLexemeBuffer(lexBuff);
         fsmReset(fsm); // state should be set to zero after delimiting character is printed
+    }
+    //The following conditional statement is used to make sure whitespace, tab chars are not added to the buffer
+    else if(fsm->currState == 0){
+        return;
     }
     else
     {
@@ -385,8 +401,9 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
             segmentOperatorChain(0, lexBuff->lexeme, lexBuff->index);
             resetLexemeBuffer(lexBuff);
         }
-        else if(prevState == -8){
-            // addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
+        /* The following conditional block is active when prev state = -8. Computer reads the value as 248 
+        after implicit type conversion of unsigned char to int takes place because of comparison operator */
+        else if(prevState == 248){
             printBufferContents(lexBuff);
             resetLexemeBuffer(lexBuff);
         }
