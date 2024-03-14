@@ -165,7 +165,16 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
             fsm->currState = -9;
         }
         break;
-
+    //case condition to check for backslash character(for escape sequence)
+    case 92:
+        if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+        }
+        else{
+            fsm->currState = 9;
+        }
+        break;
     // case condition to check for char literal
     case 39:
 
@@ -249,7 +258,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         fsm->currState = 100;
         break;
     default:
-        fsm->currState = 99;
+        fsm->currState = 9;
         break;
 }
 }
@@ -373,9 +382,12 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
 {
     uchar currState = fsm->currState;
     uchar prevState = fsm->prevState;
-    if (currState == 9 || currState == 99)
+    if (currState == 9)
     {
-        fprintf(stderr, "\nError : Invalid symbol detected. Cannot generate token...\nExiting program\n");
+        //debugging
+        printf("the ascii value of the invalid symbol is : %d\n", fileBuff->inputSymbol[0]);
+        //
+        fprintf(stderr, "\nError : Invalid lexeme or symbol detected. Cannot generate token...\nExiting program\n");
         exit(1);
     }
     // the below condition will be set when a delimiting character is encountered(punctuators, operators , string and char literals)

@@ -6,5 +6,5 @@ void main(){
     FSM *fsm = (FSM *)malloc(sizeof(FSM));
     fsm->currState = 0;
     fsm->prevState = 0;
-    printf(" the fsm states are: %d , %d", fsm->currState, fsm->prevState);
+    printf("\nthe fsm states are: %d , %d", fsm->currState, fsm->prevState);
 }
