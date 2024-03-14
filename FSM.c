@@ -227,10 +227,11 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         }
         fsm->couldBeSignedInt = 0;
         break;
-    // case condition to check for whitespace, tab and newline characters
+    // case condition to check for whitespace, tab and newline characters(\n, \r)
     case 9:
-    case 32:
     case 10:
+    case 13:
+    case 32:
         if(fsm->currState == 8){
             fsm->prevState = -8;
             fsm->currState = 8;
@@ -241,6 +242,14 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
             fsm->couldBeSignedInt = 1;
         }
 
+        break;
+    // case condition to deal with end of file
+    case 255:
+        fsm->prevState = fsm->currState;
+        fsm->currState = 100;
+        break;
+    default:
+        fsm->currState = 99;
         break;
 }
 }
@@ -311,9 +320,13 @@ void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         resetLexemeBuffer(lexBuff);
         fsmReset(fsm); // state should be set to zero after delimiting character is printed
     }
-    //The following conditional statement is used to make sure whitespace, tab chars are not added to the buffer
+    //The following conditional statement is used to make sure whitespace, tab, newline chars are not added to the buffer
     else if(fsm->currState == 0){
         return;
+    }
+    else if(fsm->currState == 100){
+        printf("\nEnd of file has been reached...\nExiting program");
+        exit(0);
     }
     else
     {
@@ -360,9 +373,9 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
 {
     uchar currState = fsm->currState;
     uchar prevState = fsm->prevState;
-    if (currState == 9)
+    if (currState == 9 || currState == 99)
     {
-        fprintf(stderr, "Error : Invalid Token\n");
+        fprintf(stderr, "\nError : Invalid symbol detected. Cannot generate token...\nExiting program\n");
         exit(1);
     }
     // the below condition will be set when a delimiting character is encountered(punctuators, operators , string and char literals)
@@ -411,6 +424,8 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
     }
     else
     {
+        if(currState != 0){
         addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
+        }
     }
 }
