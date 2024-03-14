@@ -227,9 +227,10 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         }
         fsm->couldBeSignedInt = 0;
         break;
-    // case condition to check for whitespace and tab characters
+    // case condition to check for whitespace, tab and newline characters
     case 9:
     case 32:
+    case 10:
         if(fsm->currState == 8){
             fsm->prevState = -8;
             fsm->currState = 8;
@@ -241,14 +242,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         }
 
         break;
-    //case condition to check for new line character
-    case 10:
-        if(fsm->currState == 8){
-            fsm->prevState = -8;
-            fsm->currState = 8;
-        }
-        break;
-    }
+}
 }
 void fsmReset(FSM *fsm)
 {

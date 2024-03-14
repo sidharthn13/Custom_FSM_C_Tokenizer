@@ -1,3 +1,9 @@
-void main(){ -a - 22.2 + a+;-2=->++"+/_hello_ 
-._ world"
-;
+void main(){
+    typedef struct FSM{
+        unsigned char currState;
+        unsigned char prevState;
+    }FSM;
+    FSM *fsm = (FSM *)malloc(sizeof(FSM));
+    fsm->currState = 0;
+    fsm->prevState = 0;
+}
