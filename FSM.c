@@ -138,14 +138,14 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         break;
     // case condition to check for the dot operator
     case 46:
-        if (fsm->currState != 4)
+        if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+        }
+        else if (fsm->currState != 4)
         {
             fsm->prevState = fsm->currState;
             fsm->currState = 6; // dot is treated as an operator if the lexeme in the buffer is not a numeric constant
-        }
-        else if(fsm->currState == 8){
-            fsm->prevState = -8;
-            fsm->currState = 8;
         }
         else
         {
@@ -211,14 +211,14 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
     case 94:
     case 124:
     case 126:
-        if (fsm->currState != 6 && fsm->currState != 7)
+        if(fsm->currState == 8){
+            fsm->prevState = -8;
+            fsm->currState = 8;
+        }
+        else if (fsm->currState != 6 && fsm->currState != 7)
         {
             fsm->prevState = fsm->currState;
             fsm->currState = 6;
-        }
-        else if(fsm->currState == 8){
-            fsm->prevState = -8;
-            fsm->currState = 8;
         }
         else
         {
