@@ -161,8 +161,8 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
             fsm->currState = 8;
         }
         else{
-            fsm->prevState = 8;
-            fsm->currState = 0;
+            fsm->prevState = -8;
+            fsm->currState = -9;
         }
         break;
 
@@ -264,15 +264,11 @@ void printTokenForPrevState(FSM *fsm, lexemeBuffer *lexBuff)
     }
     else if (prevState == 4)
     {
-        printf("  :  Constant\n");
+        printf("  :  Numeric Constant\n");
     }
     else if (prevState == 6 || prevState == 7)
     {
         printf("  :  Operator\n");
-    }
-    else if(prevState == 8){
-        printf("  :  String Constant\n");
-
     }
 }
 void printTokenForCurrState(FSM *fsm)
@@ -292,10 +288,20 @@ changes fsm state back to 0. If symbol is not delimiting, it adds to lexemeBuffe
 void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
 {
     if (fsm->currState == 3)
-    {
+    {     
         addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
         printBufferContents(lexBuff);
         printTokenForCurrState(fsm);
+        resetLexemeBuffer(lexBuff);
+        fsmReset(fsm); // state should be set to zero after delimiting character is printed
+    }
+    /* The following block is used to check if current state is -9. The implicit conversion of unsigned char to 
+    integer data type happens when the comparison operator is used. When unsigned char -9 is type converted into 
+    signed int and read using %d format specifier, the value is 247 */
+    else if(fsm->currState == 247){ 
+        addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
+        printBufferContents(lexBuff);
+        printf("  :  String Constant\n");
         resetLexemeBuffer(lexBuff);
         fsmReset(fsm); // state should be set to zero after delimiting character is printed
     }
