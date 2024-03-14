@@ -53,7 +53,8 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
             fsm->currState = 1;
             fsm->prevState = 1;
         }
-        else if(fsm->currState == 8){
+        else if (fsm->currState == 8)
+        {
             fsm->prevState = -8;
             fsm->currState = 8;
         }
@@ -82,7 +83,8 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
             fsm->prevState = 1;
             fsm->currState = 1;
         }
-        else if(fsm->currState == 8){
+        else if (fsm->currState == 8)
+        {
             fsm->prevState = -8;
             fsm->currState = 8;
         }
@@ -103,11 +105,13 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
     case 93:
     case 123:
     case 125:
-        if(fsm->currState == 8){
+        if (fsm->currState == 8)
+        {
             fsm->prevState = -8;
             fsm->currState = 8;
         }
-        else{
+        else
+        {
             fsm->prevState = fsm->currState;
             fsm->currState = 3;
             fsm->couldBeSignedInt = 1;
@@ -125,7 +129,8 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
             fsm->currState = 1;
             fsm->prevState = 1;
         }
-        else if(fsm->currState == 8){
+        else if (fsm->currState == 8)
+        {
             fsm->prevState = -8;
             fsm->currState = 8;
         }
@@ -138,7 +143,8 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         break;
     // case condition to check for the dot operator
     case 46:
-        if(fsm->currState == 8){
+        if (fsm->currState == 8)
+        {
             fsm->prevState = -8;
             fsm->currState = 8;
         }
@@ -156,22 +162,26 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
         break;
     // case condition to check for string literal
     case 34:
-        if(fsm->currState !=8 ){
+        if (fsm->currState != 8)
+        {
             fsm->prevState = fsm->currState;
             fsm->currState = 8;
         }
-        else{
+        else
+        {
             fsm->prevState = -8;
             fsm->currState = -9;
         }
         break;
-    //case condition to check for backslash character(for escape sequence)
+    // case condition to check for backslash character(for escape sequence)
     case 92:
-        if(fsm->currState == 8){
+        if (fsm->currState == 8)
+        {
             fsm->prevState = -8;
             fsm->currState = 8;
         }
-        else{
+        else
+        {
             fsm->currState = 9;
         }
         break;
@@ -183,7 +193,8 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
     // case condition to check for + and -
     case 43:
     case 45:
-        if(fsm->currState == 8){
+        if (fsm->currState == 8)
+        {
             fsm->prevState = -8;
             fsm->currState = 8;
             break;
@@ -201,9 +212,10 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
                 fsm->prevState = 6;
                 fsm->currState = 6;
             }
-            else{
-            fsm->prevState = fsm->currState;
-            fsm->currState = 6;
+            else
+            {
+                fsm->prevState = fsm->currState;
+                fsm->currState = 6;
             }
         }
         break;
@@ -220,7 +232,8 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
     case 94:
     case 124:
     case 126:
-        if(fsm->currState == 8){
+        if (fsm->currState == 8)
+        {
             fsm->prevState = -8;
             fsm->currState = 8;
         }
@@ -241,11 +254,13 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
     case 10:
     case 13:
     case 32:
-        if(fsm->currState == 8){
+        if (fsm->currState == 8)
+        {
             fsm->prevState = -8;
             fsm->currState = 8;
         }
-        else{
+        else
+        {
             fsm->prevState = fsm->currState;
             fsm->currState = 0;
             fsm->couldBeSignedInt = 1;
@@ -260,7 +275,7 @@ void fsmUpdateState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
     default:
         fsm->currState = 9;
         break;
-}
+    }
 }
 void fsmReset(FSM *fsm)
 {
@@ -306,34 +321,32 @@ void printTokenForCurrState(FSM *fsm)
     {
         printf("  :  Operator\n");
     }
+    else if (currState == 247)
+    {
+        printf("  :  String Constant\n");
+    }
 }
 /* The following function prints delimiter and token when delimiting character is found,
 changes fsm state back to 0. If symbol is not delimiting, it adds to lexemeBuffer*/
 void stabilizeState(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *fileBuff)
 {
-    if (fsm->currState == 3)
-    {     
+    /* State 247 represents the signed integer representation of unsigned character = -9. When comparison operator
+    is used, implicit type conversion of short data types into int data type is done by the compiler */
+    if (fsm->currState == 3 || fsm->currState == 247)
+    {
         addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
         printBufferContents(lexBuff);
         printTokenForCurrState(fsm);
         resetLexemeBuffer(lexBuff);
         fsmReset(fsm); // state should be set to zero after delimiting character is printed
     }
-    /* The following block is used to check if current state is -9. The implicit conversion of unsigned char to 
-    integer data type happens when the comparison operator is used. When unsigned char -9 is type converted into 
-    signed int and read using %d format specifier, the value is 247 */
-    else if(fsm->currState == 247){ 
-        addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
-        printBufferContents(lexBuff);
-        printf("  :  String Constant\n");
-        resetLexemeBuffer(lexBuff);
-        fsmReset(fsm); // state should be set to zero after delimiting character is printed
-    }
-    //The following conditional statement is used to make sure whitespace, tab, newline chars are not added to the buffer
-    else if(fsm->currState == 0){
+    // The following conditional statement is used to make sure whitespace, tab, newline chars are not added to the buffer
+    else if (fsm->currState == 0)
+    {
         return;
     }
-    else if(fsm->currState == 100){
+    else if (fsm->currState == 100)
+    {
         printf("\nEnd of file has been reached...\nExiting program");
         exit(0);
     }
@@ -384,9 +397,6 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
     uchar prevState = fsm->prevState;
     if (currState == 9)
     {
-        //debugging
-        printf("the ascii value of the invalid symbol is : %d\n", fileBuff->inputSymbol[0]);
-        //
         fprintf(stderr, "\nError : Invalid lexeme or symbol detected. Cannot generate token...\nExiting program\n");
         exit(1);
     }
@@ -420,9 +430,10 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
             segmentOperatorChain(0, lexBuff->lexeme, lexBuff->index);
             resetLexemeBuffer(lexBuff);
         }
-        /* The following conditional block is active when prev state = -8. Computer reads the value as 248 
+        /* The following conditional block is active when prev state = -8. Computer reads the value as 248
         after implicit type conversion of unsigned char to int takes place because of comparison operator */
-        else if(prevState == 248){
+        else if (prevState == 248)
+        {
             printBufferContents(lexBuff);
             resetLexemeBuffer(lexBuff);
         }
@@ -436,8 +447,9 @@ void performStateOperation(FSM *fsm, lexemeBuffer *lexBuff, fileReadBuffer *file
     }
     else
     {
-        if(currState != 0){
-        addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
+        if (currState != 0)
+        {
+            addToLexemeBuffer(lexBuff, fileBuff->inputSymbol[0]);
         }
     }
 }
