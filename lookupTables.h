@@ -1,5 +1,5 @@
 // macro definitions for map size:
-#define KEYWORD_MAP_SIZE 32
+#define KEYWORD_MAP_SIZE 34
 #define OPERATOR_MAP_SIZE 33
 
 // defining bucket struct for keyword map:

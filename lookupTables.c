@@ -41,7 +41,7 @@ void addToMap(mapNode *map[], mapNode *mapEntry)
 void keywordMapInit()
 {
     char *keywords[KEYWORD_MAP_SIZE] = {"auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else",
-                                        "enum", "extern", "float", "for", "goto", "if", "int", "long", "register", "return", "short",
+                                        "enum", "extern", "float", "for", "goto", "if", "int", "long", "register", "return", "short", "malloc", "free",
                                          "signed", "sizeof", "static", "struct","switch", "typedef", "union", "unsigned", "void", "volatile", "while"};
     for (int i = 0; i < KEYWORD_MAP_SIZE; i++)
     {
